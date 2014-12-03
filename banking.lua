@@ -29,6 +29,22 @@ function bank.openNewAccount(name, initial_deposit)
     accounts[name].balance = initial_deposit
 end
 
+function countPlayerInventoryItems(inventory, item_name)
+    return countItems(inventory, "main", item_name)
+end
+
+function countItems(inventory, list_name, item_name)
+    count = 0
+    for i = 0, inventory:get_size(list_name), 1 do
+        stack = inventory:get_stack(list_name, i)
+        if stack:get_name() == item_name then
+            count = count + stack:get_count()
+        end
+    end
+    
+    return count
+end
+
 -- Init
 
 bank.loadAccounts()
@@ -39,9 +55,12 @@ minetest.register_node("mteconomy:atm", {
 		
 		on_rightclick = function(pos, node, player, itemstack, pointed_thing)
             name = player:get_player_name()
+            balance = bank.getBalance(name)
+            player_balance = countPlayerInventoryItems(player:get_inventory(), "mteconomy:coin")
             minetest.show_formspec(name, "youkai_economy:atm_form", "size[8,5.6]"..
-                "field[0.256,0.5;8,1;bartershopname;Name of your barter shop:;]"..
-                "field[0.256,1.5;8,1;nodename1;What kind of a node do you want to exchange:;]"..
+                "label[0.25,0.2;Welcome, "..name..".]"..
+                "label[0.25,0.6;Current Account Balance: "..balance.."]"..
+                "label[0.25,1.0;Current Inventory Balance: "..player_balance.."]"..
                 "field[0.256,2.5;8,1;nodename2;for:;]"..
                 "field[0.256,3.5;8,1;amount1;Amount of first kind of node:;]"..
                 "field[0.256,4.5;8,1;amount2;Amount of second kind of node:;]"..
